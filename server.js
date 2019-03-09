@@ -25,7 +25,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 
-mongoose.connect(db.url);
+mongoose.connect(db.url, {
+    // sets how many times to try reconnecting
+    reconnectTries: Number.MAX_VALUE,
+    // sets the delay between every retry (milliseconds)
+    reconnectInterval: 5000         
+});
 var connection = mongoose.connection;
 connection.on('error', console.error.bind(console, 'connection error:'));
 connection.once('open', function() {
