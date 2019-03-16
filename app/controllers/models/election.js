@@ -61,6 +61,10 @@ var electionSchema = new Schema({
   candidates: {
       required: true,
       type: [candidateSchema]
+  },
+  amountOfWinners: {
+      required: false,
+      type: Number
   }
 
 });

@@ -24,10 +24,11 @@ class ElectionController {
         election.forConsituencies = req.body.forConsituencies;
         election.candidates = req.body.candidates;
         election.closeDate = req.body.closeDate;
+        election.amountOfWinners = req.body.amountOfWinners;
 
         Election.create(election.toJSON(), (err, out) => {
             if (err) { 
-                res.send({ 'ERROR': 'An error has occurred '+err }); 
+                res.status(500).send({ 'ERROR': 'An error has occurred '+err }); 
             } else {
                 res.send(out);
             }
@@ -36,7 +37,7 @@ class ElectionController {
       catch (err)
       {
         console.log(err);
-        res.send({"ERROR": 'An error has occurred '+err});
+        res.status(500).send({"ERROR": 'An error has occurred '+err});
       }
     }
 
@@ -47,7 +48,7 @@ class ElectionController {
         const idObject = { '_id': new ObjectID(id) };
         Election.findOne(idObject, (err, out) => {
             if (err) {
-                res.send({'ERROR':'An error has occurred '+err});
+                res.status(500).send({'ERROR':'An error has occurred '+err});
             } else {
                 res.send(out);
             }
@@ -56,7 +57,7 @@ class ElectionController {
       catch (err)
       {
         console.log(err);
-        res.send({"ERROR": 'An error has occurred '+err});
+        res.status(500).send({"ERROR": 'An error has occurred '+err});
       }
     }
 
@@ -65,7 +66,7 @@ class ElectionController {
       {
         Election.find({}, (err, out) => {
             if (err) {
-              res.send({'ERROR':'An error has occurred '+err});
+              res.status(500).send({'ERROR':'An error has occurred '+err});
             } else {
               res.send(out);
             }
@@ -74,7 +75,7 @@ class ElectionController {
       catch (err)
       {
         console.log(err);
-        res.send({"ERROR": 'An error has occurred '+err});
+        res.status(500).send({"ERROR": 'An error has occurred '+err});
       }
     }
 
@@ -91,12 +92,13 @@ class ElectionController {
         election.forConsituencies = req.body.forConsituencies;
         election.candidates = req.body.candidates;
         election.closeDate = req.body.closeDate;
+        election.amountOfWinners = req.body.amountOfWinners;
         election._id = id;
 
       
         Election.updateOne(idObject, election.toJSON(), (err, out) => {
           if (err) {
-              res.send({'ERROR':'An error has occurred '+err});
+              res.status(500).send({'ERROR':'An error has occurred '+err});
           } else {
               res.send(out);
           } 
@@ -105,7 +107,7 @@ class ElectionController {
       catch (err)
       {
         console.log(err);
-        res.send({"ERROR": 'An error has occurred '+err});
+        res.status(500).send({"ERROR": 'An error has occurred '+err});
       }
     }
 
@@ -116,7 +118,7 @@ class ElectionController {
         const idObject = { '_id': new ObjectID(id) };
         Election.deleteOne(idObject, (err, out) => {
           if (err) {
-            res.send({'ERROR':'An error has occurred '+err});
+            res.status(500).send({'ERROR':'An error has occurred '+err});
           } else {
             res.send(out + ' deleted');
           } 
@@ -125,7 +127,7 @@ class ElectionController {
       catch (err)
       {
         console.log(err);
-        res.send({"ERROR": 'An error has occurred '+err});
+        res.status(500).send({"ERROR": 'An error has occurred '+err});
       }
     }
 
@@ -134,7 +136,7 @@ class ElectionController {
         try{
             Election.find({}, async (err, out) => {
                 if (err) {
-                    res.send({'ERROR':'An error has occurred '+err});
+                    res.status(500).send({'ERROR':'An error has occurred '+err});
                 } else {
                     
                     let user = await GetUserFromToken(req, res);
@@ -144,7 +146,7 @@ class ElectionController {
                     const userIdObject = { '_id': new ObjectID(userId) };
                     User.findOne(userIdObject, (err, userOut) => {
                         if (err) {
-                            res.send({'ERROR':'An error has occurred '+err});
+                            res.status(500).send({'ERROR':'An error has occurred '+err});
                         } else {
                             if (userOut.submittedVotes == null)
                                 userOut.submittedVotes = [];
@@ -184,7 +186,7 @@ class ElectionController {
         }
         catch (err){
             console.log(err);
-            res.send({"ERROR": 'An error has occurred '+err});
+            res.status(500).send({"ERROR": 'An error has occurred '+err});
         }
     }
 
@@ -201,7 +203,7 @@ class ElectionController {
 
             Election.findOne(idObject, async (err, out) => {
                 if (err) {
-                    res.send({'ERROR':'An error has occurred '+err});
+                    res.status(500).send({'ERROR':'An error has occurred '+err});
                 } else {
 
                     let user = await GetUserFromToken(req, res);
@@ -211,12 +213,12 @@ class ElectionController {
                     const userIdObject = { '_id': new ObjectID(userId) };
                     User.findOne(userIdObject, (err, userOut) => {
                         if (err) {
-                            res.send({'ERROR':'An error has occurred '+err});
+                            res.status(500).send({'ERROR':'An error has occurred '+err});
                         }
                         else {
                             if (userOut.submittedVotes != null)
                             {
-                                if (userOut.submittedVotes.includes(id)) {
+                                if (userOut.submittedVotes.includes(id) && out.electionType == "FPTP") {
                                     res.send({'SUCCESS':'VOTE PLACED'});
                                 }
                                 else {
@@ -227,7 +229,7 @@ class ElectionController {
                                         index++;
 
                                     if (updatedCandidate == undefined)
-                                        res.send({'ERROR':'An error has occurred Candidate could not be found'});
+                                        res.status(500).send({'ERROR':'An error has occurred Candidate could not be found'});
                                     else
                                     {
                                         updatedCandidate.votes.push(vote);
@@ -239,6 +241,7 @@ class ElectionController {
                                         election.electionType = out.electionType;
                                         election.forConsituencies = out.forConsituencies;
                                         election.closeDate = out.closeDate;
+                                        election.amountOfWinners = out.amountOfWinners;
                                         election._id = id;
                 
                                         let candidates = out.candidates;
@@ -248,7 +251,7 @@ class ElectionController {
                 
                                         Election.updateOne(idObject, election.toJSON(), (err, newOut) => {
                                             if (err) {
-                                                res.send({'ERROR':'An error has occurred '+err});
+                                                res.status(500).send({'ERROR':'An error has occurred '+err});
                                             } else {
                                                 res.send({'SUCCESS':'VOTE PLACED'});
                                             } 
@@ -265,7 +268,7 @@ class ElectionController {
             
         } catch (err){
             console.log(err);
-            res.send({"ERROR": 'An error has occurred '+err});
+            res.status(500).send({"ERROR": 'An error has occurred '+err});
         }
     }
 
@@ -289,7 +292,7 @@ class ElectionController {
                     out.submittedVotes.push(electionId);
                     User.updateOne(userIdObject, out.toJSON(), (err, res) => {
                         if (err)
-                            res.send({"ERROR": 'An error has occurred '+err});
+                            res.status(500).send({"ERROR": 'An error has occurred '+err});
                         else {
                             res.send({"SUCCESS": "Voted Placed"});
                         }
@@ -299,7 +302,7 @@ class ElectionController {
 
         } catch (err){
             console.log(err);
-            res.send({"ERROR": 'An error has occurred '+err});
+            res.status(500).send({"ERROR": 'An error has occurred '+err});
         }
     }
 
