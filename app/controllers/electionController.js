@@ -306,6 +306,58 @@ class ElectionController {
         }
     }
 
+    async login(req, res){
+        try
+        {
+          let postCode = req.body.postCode;
+          let postCodeObject = { '_id': new Object(postCode) };
+  
+   
+    
+          await User.find({postCode: postCode}, async (err, out) => {
+            if (err) {
+              res.status(500).send('FAILURE '+err);
+            } else {
+              if (out == null)
+                res.status(500).send('FAILURE Could not find anyone at that postcode');
+              else {
+                
+                for (let i = 0; i < out.length; i++)
+                {
+                    if (bcrypt.compareSync(req.body.userCode + req.body.postCode, out[i].eUID))
+                    {
+  
+                      // create a token
+                      var token = jwt.sign({
+                        _id: out[i]._id,
+                        firstName: out[i].firstName,
+                        lastName: out[i].lastName,
+                        isAuditor : out[i].isAuditor,
+                        postCode : out[i].postCode,
+                        countryId : out[i].countryId,
+                        nationality : out[i].nationality,
+                        dateOfBirth : out[i].dateOfBirth,
+                        fullAddress : out[i].fullAddress,
+                      }, config.localSecret, {
+                        expiresIn: 1000000000000000086400 // expires in a very long time (Need so tests still work)
+                      });
+                      res.send(token);
+                      return;
+                    }
+                }
+  
+                res.status(500).send('FAILURE No Matching users at that postcode');
+              }
+            }
+          });
+        }
+        catch (err)
+        {
+          console.log(err);
+          res.status(500).send({"ERROR": 'An error has occurred'});
+        }
+      }
+
 
 }
 

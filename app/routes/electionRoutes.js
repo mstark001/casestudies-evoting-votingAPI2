@@ -1,6 +1,7 @@
 var ElectionController = require('../controllers/electionController.js');
 const VerifyLoginToken = require('./VerifyLoggedIn');
 const VerifyAuditToken = require('./VerifyAuditor');
+const VerifyRedirectToken = require('./VerifyRedirect');
 
 module.exports = function(routes) {
 
@@ -24,4 +25,6 @@ module.exports = function(routes) {
   //Record User as Voted in Election
   routes.get('/elections/:id/markAsVoted', VerifyLoginToken, electionController.recordUserAsVoted);
 
+  //login to local server
+  routes.post('/elections/login', VerifyRedirectToken, electionController.login);
 }; 
