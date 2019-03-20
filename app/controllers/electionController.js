@@ -196,6 +196,25 @@ class ElectionController {
                 "forConstiuency" : req.body.consistuency
             };
 
+
+            const electionId = req.body.electionId;
+ 
+
+            let user = await GetUserFromToken(req, res);
+
+            const userId = user._id;
+            const userIdObject = { '_id': new ObjectID(userId) };
+            User.findOne(userIdObject, (err, out) => {
+                if (out.submittedVotes == null)
+                    out.submittedVotes = [];
+
+                if (!(out.submittedVotes.includes(electionId))) {
+                    out.submittedVotes.push(electionId);
+                    User.updateOne(userIdObject, out.toJSON(), (err, res) => {})
+                }
+            });
+
+
             const id = req.body.electionId
             const idObject = { '_id': new ObjectID(id) };
 
