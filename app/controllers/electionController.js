@@ -190,7 +190,7 @@ class ElectionController {
         }
     }
 
-    recordVote(req, res){
+    async recordVote(req, res){
         try{
             let vote = {
                 "forConstiuency" : req.body.consistuency
