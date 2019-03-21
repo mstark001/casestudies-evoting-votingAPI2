@@ -22,6 +22,8 @@ module.exports = function(routes) {
   routes.get('/elections/current', VerifyLoginToken, electionController.getCurrentElections);
   //Record Vote
   routes.post('/elections/vote', VerifyLoginToken, electionController.recordVote);
+  //Record Vote spoil
+  routes.post('/elections/spoil', VerifyLoginToken, electionController.recordVoteSpoil);
   //Record User as Voted in Election
   routes.get('/elections/:id/markAsVoted', VerifyLoginToken, electionController.recordUserAsVoted);
 
